@@ -1,0 +1,425 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Super Escambo - Produtos de Qualidade!</title>
+
+<style>
+  /* ========== Variáveis ========== */
+  :root{
+    --bg: #f1f5f9;
+    --card: #ffffff;
+    --text: #0f172a;
+    --muted: #64748b;
+    --header: #2563eb;
+    --accent: #3b82f6;
+    --success: #16a34a;
+    --shadow: 0 14px 40px rgba(2,6,23,0.08);
+    --sidebar-w: 300px;
+    --radius: 12px;
+    --trans: 220ms cubic-bezier(.2,.9,.3,1);
+  }
+
+  .theme-dark{
+    --bg: #0b1220;
+    --card: #0f1724;
+    --text: #e6eef8;
+    --muted: #9aa7bd;
+    --header: #0b1220;
+    --accent: #60a5fa;
+    --shadow: 0 18px 48px rgba(2,6,23,0.45);
+  }
+
+  /* cor do contador do carrinho no tema escuro */
+.theme-dark .cart-btn span {
+  color: white;     /* usa a variável de destaque (azul claro) */
+  font-weight: 800;         /* opcional: deixar o número mais visível */
+}
+
+.theme-dark .cart-btn{
+    border-color: white;
+}
+
+  /* ========== Reset ========== */
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+    transition: background 200ms ease, color 200ms ease;
+    padding-bottom:40px;
+  }
+
+  .wrap{max-width:1100px;margin:0 auto;padding:12px;}
+
+  /* ========== Header ========== */
+  header{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    background:linear-gradient(180deg,var(--header), #3b82f6 140%);
+    color:white;
+    padding:12px 14px;
+    border-radius:10px;
+  }
+  .left{
+    display:flex;gap:10px;align-items:center;min-width:0;
+  }
+  .hamburger{
+    width:44px;height:44px;border-radius:10px;border:0;background:transparent;color:white;font-size:20px;
+    display:grid;place-items:center;cursor:pointer;
+  }
+  .brand{display:flex;flex-direction:column;line-height:1;min-width:0}
+  .brand .title{font-weight:700;font-size:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .brand .sub{font-size:12px;opacity:0.9}
+
+  .spacer{flex:1}
+
+  .header-actions{display:flex;align-items:center;gap:8px}
+
+  .cart-btn{
+    background:var(--card);
+    color:var(--header);
+    padding:8px 12px;border-radius:999px;font-weight:700;
+  }
+
+
+
+  /* ========== Overlay & Sidebar ========== */
+  .overlay{
+    position:fixed;inset:0;background:rgba(2,6,23,0.28);backdrop-filter:blur(4px);
+    opacity:0;pointer-events:none;transition:opacity var(--trans);z-index:40;
+  }
+  .overlay.show{opacity:1;pointer-events:auto}
+
+  .sidebar{
+    position:fixed;left:0;top:0;height:100vh;width:var(--sidebar-w);
+    background:linear-gradient(180deg,var(--card), color-mix(in srgb, var(--card) 95%, transparent));
+    box-shadow:var(--shadow);transform:translateX(-120%);transition:transform var(--trans);
+    z-index:50;padding:18px;display:flex;flex-direction:column;gap:14px;border-top-right-radius:14px;border-bottom-right-radius:14px;
+  }
+  .sidebar.show{transform:translateX(0)}
+
+  /* Sidebar header */
+  .sidebar .head{display:flex;align-items:center;gap:10px}
+  .sidebar .head .title{font-weight:800;font-size:18px}
+  .sidebar .close{
+    margin-left:auto;background:transparent;border:0;font-size:20px;color:var(--muted);padding:8px;border-radius:8px;cursor:pointer;
+  }
+  .sidebar .close:focus{outline:2px solid rgba(37,99,235,0.16)}
+
+  /* mobile search inside sidebar */
+  .search-mobile{display:flex;gap:8px;padding:6px;background:rgba(0,0,0,0.03);border-radius:10px;align-items:center}
+  .search-mobile input{border:0;background:transparent;padding:8px;outline:none;width:100%;color:var(--text)}
+
+  /* nav links: spaced, readable */
+  .nav-links{display:flex;flex-direction:column;gap:8px;margin-top:8px}
+  .nav-links a{
+    display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;color:var(--text);text-decoration:none;font-weight:700;
+    transition:background 160ms,color 160ms;
+  }
+  .nav-links a:hover{background:rgba(2,6,23,0.04);color:var(--accent)}
+
+  /* small badges / helper */
+  .sidebar .meta{margin-top:auto;color:var(--muted);font-size:13px}
+
+  /* ========== Theme toggle (pill) ========== */
+  .theme-pill{
+    display:inline-flex;align-items:center;gap:8px;padding:6px;border-radius:999px;border:1px solid rgba(2,6,23,0.06);
+    background:linear-gradient(90deg, rgba(2,6,23,0.02), transparent);cursor:pointer;width:92px;height:40px;
+  }
+  .pill-track{flex:1;height:26px;border-radius:999px;position:relative;padding:4px;background:transparent}
+  .pill-knob{position:absolute;left:4px;top:4px;width:18px;height:18px;border-radius:50%;background:white;box-shadow:0 8px 20px rgba(2,6,23,0.12);transition:left 160ms ease}
+  .theme-pill[aria-checked="true"] .pill-knob{left:calc(100% - 22px)}
+  .theme-pill .ico{font-size:13px;opacity:0.92}
+
+  /* ========== Content ========== */
+  .banner{margin-top:12px;border-radius:10px;overflow:hidden;height:160px;background-image:url('https://images.unsplash.com/photo-1607083206968-13611e3d76db?q=80&w=1400&auto=format&fit=crop');background-size:cover;background-position:center;display:flex;align-items:center;justify-content:center;color:white;font-weight:800;text-shadow:0 2px 10px rgba(0,0,0,0.35)}
+  .container{margin-top:14px;padding:12px;display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+  .card{background:var(--card);border-radius:10px;overflow:hidden;box-shadow:0 8px 20px rgba(2,6,23,0.04);transition:transform 160ms,box-shadow 160ms;display:flex;flex-direction:column}
+  .card:hover{transform:translateY(-6px);box-shadow:var(--shadow)}
+  .card img{width:100%;height:150px;object-fit:cover;display:block}
+  .card .body{padding:12px;text-align:center}
+  .price{color:var(--success);font-weight:800;margin-top:8px}
+
+  /* footer */
+  footer{margin-top:18px;padding:16px;border-radius:10px;background:linear-gradient(180deg,var(--header), #3b82f6 140%);color:white;text-align:center;font-weight:700}
+
+  /* ========== Responsive tweaks for 375x667 ========== */
+  @media (max-width:480px){
+    .wrap{padding:10px}
+    .brand .sub{display:none}
+    .search-mobile{display:flex}
+    .banner{height:130px}
+    .sidebar{width:86vw;max-width:320px;padding:16px}
+    .theme-pill{width:78px;height:36px}
+    .pill-knob{width:16px;height:16px}
+    .hamburger{width:40px;height:40px}
+    .cart-btn{padding:8px 10px}
+    .container{grid-template-columns:1fr;gap:12px}
+  }
+
+  /* focus ring */
+  :focus{outline:3px solid rgba(37,99,235,0.12);outline-offset:2px}
+</style>
+</head>
+<body>
+  <div class="wrap">
+
+    <!-- Header -->
+    <header>
+      <div class="left">
+        <button class="hamburger" id="openBtn" aria-label="Abrir menu" aria-controls="sidebar">☰</button>
+        <div class="brand">
+          <div class="title">🛒 Super Escambo</div>
+        </div>
+      </div>
+
+      <div class="spacer" aria-hidden="true"></div>
+
+      <div class="header-actions" role="group" aria-label="Ações do cabeçalho">
+        <!-- theme pill in header (mirrors sidebar state) -->
+        <button id="themeHeader" class="theme-pill" aria-checked="false" aria-label="Alternar tema">
+          <span class="ico">☀️</span>
+          <span class="pill-track" aria-hidden="true"><span class="pill-knob"></span></span>
+          <span class="ico">🌙</span>
+        </button>
+
+        <button class="cart-btn" aria-label="Carrinho">🛒 <span style="margin-left:8px">0</span></button>
+      </div>
+    </header>
+
+    <!-- Overlay + Sidebar -->
+    <div id="overlay" class="overlay" aria-hidden="true"></div>
+
+    <aside id="sidebar" class="sidebar" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Menu lateral">
+      <div class="head">
+        <div class="title">Menu</div>
+        <button id="closeBtn" class="close" aria-label="Fechar menu">✕</button>
+      </div>
+
+      <div class="search-mobile" role="search" aria-label="Buscar">
+        <input id="searchMobile" type="search" placeholder="Buscar produtos...">
+        <button id="searchApply" style="background:var(--accent);color:white;border:0;padding:8px 10px;border-radius:8px">OK</button>
+      </div>
+
+      <nav class="nav-links" aria-label="Navegação">
+        <a href="#inicio">🏠 Início</a>
+        <a href="#produtos">🛍️ Produtos</a>
+        <a href="#ofertas">🔥 Ofertas</a>
+        <a href="#contato">✉️ Contato</a>
+      </nav>
+
+      <div class="meta" aria-hidden="false">© 2026 Super Loja</div>
+
+      <!-- Theme pill inside sidebar (keeps state synced) -->
+      <div style="margin-top:12px;display:flex;justify-content:center">
+        <button id="themeSidebar" class="theme-pill" aria-checked="false" aria-label="Alternar tema (sidebar)">
+          <span class="ico">☀️</span>
+          <span class="pill-track" aria-hidden="true"><span class="pill-knob"></span></span>
+          <span class="ico">🌙</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Content -->
+    <main>
+      <section id="inicio" class="banner" aria-label="Banner">
+        Mega Promoções!
+      </section>
+
+      <section id="produtos" class="container" aria-label="Produtos">
+        <article class="card">
+          <img src="https://images.unsplash.com/photo-1511707171634-5f897ff02aa9?q=80&w=1400&auto=format&fit=crop" alt="Smartphone">
+          <div class="body">
+            <div style="font-weight:800">Smartphone</div>
+            <div class="price">R$ 1.999</div>
+            <div style="margin-top:10px"><button style="width:100%;padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer" onclick="addCart(this)">Comprar</button></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="https://images.unsplash.com/photo-1496181133206-80ce9b88a853?q=80&w=1400&auto=format&fit=crop" alt="Notebook">
+          <div class="body">
+            <div style="font-weight:800">Notebook</div>
+            <div class="price">R$ 3.499</div>
+            <div style="margin-top:10px"><button style="width:100%;padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer" onclick="addCart(this)">Comprar</button></div>
+          </div>
+        </article>
+
+        <article class="card">
+          <img src="https://images.unsplash.com/photo-1585386959984-a4155224a1ad?q=80&w=1400&auto=format&fit=crop" alt="Fone Bluetooth">
+          <div class="body">
+            <div style="font-weight:800">Fone Bluetooth</div>
+            <div class="price">R$ 299</div>
+            <div style="margin-top:10px"><button style="width:100%;padding:8px 10px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer" onclick="addCart(this)">Comprar</button></div>
+          </div>
+        </article>
+      </section>
+
+      <!-- Ofertas -->
+      <section id="ofertas" style="max-width:1100px;margin:18px auto;padding:12px" aria-label="Ofertas">
+        <h2 style="font-size:20px;margin-bottom:12px">Ofertas da Semana</h2>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
+          <div class="card">
+            <img src="https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=1400&auto=format&fit=crop" alt="MacBook">
+            <div class="body">
+              <div style="font-weight:800">MacBook</div>
+              <div class="price">R$ 5.999</div>
+              <div style="margin-top:10px"><button style="width:100%;padding:8px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer">Comprar</button></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <img src="https://imgs.search.brave.com/dFoZ5lLr2H9DAY41aga9SM6E3rVHKfmUq7Vdq0B849o/rs:fit:860:0:0:0/g:ce/aHR0cHM6Ly9odHRw/Mi5tbHN0YXRpYy5j/b20vRF9RX05QXzJY/Xzg5NzQ1NS1NTEE5/OTUwNjgwMzExMl8x/MTIwMjUtRS53ZWJw" alt="Tablet">
+            <div class="body">
+              <div style="font-weight:800">Tablet</div>
+              <div class="price">R$ 999</div>
+              <div style="margin-top:10px"><button style="width:100%;padding:8px;border-radius:8px;border:0;background:var(--accent);color:white;cursor:pointer">Comprar</button></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contato -->
+      <section id="contato" style="max-width:800px;margin:18px auto;padding:12px" aria-label="Contato">
+        <h2 style="font-size:20px;margin-bottom:12px">Contato</h2>
+        <div style="background:var(--card);padding:14px;border-radius:10px;box-shadow:var(--shadow)">
+          <input style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin-bottom:10px" placeholder="Seu nome">
+          <input style="width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);margin-bottom:10px" placeholder="Seu email">
+          <textarea style="resize:none;width:100%;padding:10px;border-radius:8px;border:1px solid rgba(0,0,0,0.06);min-height:120px"></textarea>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button style="background:var(--accent);color:white;padding:10px 14px;border-radius:8px;border:0;cursor:pointer">Enviar</button>
+            <button style="background:transparent;border:1px solid rgba(0,0,0,0.06);padding:10px 14px;border-radius:8px;cursor:pointer">Limpar</button>
+          </div>
+        </div>
+      </section>
+
+      <footer>© 2026 Super Loja</footer>
+    </main>
+
+  </div>
+
+<script>
+  // Elements
+  const openBtn = document.getElementById('openBtn');
+  const closeBtn = document.getElementById('closeBtn');
+  const overlay = document.getElementById('overlay');
+  const sidebar = document.getElementById('sidebar');
+  const themeHeader = document.getElementById('themeHeader');
+  const themeSidebar = document.getElementById('themeSidebar');
+  const THEME_KEY = 'superloja:theme';
+
+  // Open / close sidebar
+  function openSidebar(){
+    sidebar.classList.add('show');
+    overlay.classList.add('show');
+    sidebar.setAttribute('aria-hidden','false');
+    overlay.setAttribute('aria-hidden','false');
+    // move focus
+    setTimeout(()=> {
+      const f = sidebar.querySelector('input, a, button');
+      if(f) f.focus();
+    }, 80);
+  }
+  function closeSidebar(){
+    sidebar.classList.remove('show');
+    overlay.classList.remove('show');
+    sidebar.setAttribute('aria-hidden','true');
+    overlay.setAttribute('aria-hidden','true');
+    openBtn.focus();
+  }
+
+  openBtn.addEventListener('click', openSidebar);
+  closeBtn.addEventListener('click', closeSidebar);
+  overlay.addEventListener('click', closeSidebar);
+
+  // ESC key closes sidebar
+  document.addEventListener('keydown', (e) => {
+    if(e.key === 'Escape' && sidebar.classList.contains('show')) closeSidebar();
+  });
+
+  // Theme logic (sync header + sidebar)
+  function applyTheme(isDark){
+    if(isDark){
+      document.documentElement.classList.add('theme-dark');
+      themeHeader.setAttribute('aria-checked','true');
+      themeSidebar.setAttribute('aria-checked','true');
+      localStorage.setItem(THEME_KEY,'dark');
+    } else {
+      document.documentElement.classList.remove('theme-dark');
+      themeHeader.setAttribute('aria-checked','false');
+      themeSidebar.setAttribute('aria-checked','false');
+      localStorage.setItem(THEME_KEY,'light');
+    }
+  }
+  function toggleTheme(){
+    const isDark = document.documentElement.classList.contains('theme-dark');
+    applyTheme(!isDark);
+  }
+  themeHeader.addEventListener('click', toggleTheme);
+  themeSidebar.addEventListener('click', toggleTheme);
+
+  // init theme from storage
+  (function initTheme(){
+    const saved = localStorage.getItem(THEME_KEY);
+    applyTheme(saved === 'dark');
+  })();
+
+  // Search: apply mobile search into cards
+  const searchMobile = document.getElementById('searchMobile');
+  const searchApply = document.getElementById('searchApply');
+  searchApply.addEventListener('click', () => {
+    const q = (searchMobile.value || '').trim().toLowerCase();
+    filterCards(q);
+    closeSidebar();
+  });
+
+  function filterCards(q){
+    const cards = document.querySelectorAll('.card');
+    let any = false;
+    cards.forEach(card => {
+      const title = (card.querySelector('.body > div')?.textContent || '').toLowerCase();
+      if(!q || title.includes(q)){
+        card.style.display = '';
+        any = true;
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    // optionally show message when none found (omitted here)
+  }
+
+  // small cart demo
+  function addCart(btn){
+    const span = document.querySelector('.cart-btn span');
+    let n = parseInt(span.textContent || '0', 10) || 0;
+    n++;
+    span.textContent = n;
+    btn.textContent = 'Adicionado ✓';
+    btn.disabled = true;
+    setTimeout(()=> { btn.textContent = 'Comprar'; btn.disabled = false; }, 1100);
+  }
+
+  // focus trap in sidebar (basic)
+  sidebar.addEventListener('keydown', (e) => {
+    if(e.key !== 'Tab') return;
+    const focusables = sidebar.querySelectorAll('a,button,input');
+    if(!focusables.length) return;
+    const first = focusables[0];
+    const last = focusables[focusables.length-1];
+    if(e.shiftKey && document.activeElement === first){ e.preventDefault(); last.focus(); }
+    else if(!e.shiftKey && document.activeElement === last){ e.preventDefault(); first.focus(); }
+  });
+
+  // close sidebar on resize if desktop
+  window.addEventListener('resize', () => {
+    if(window.innerWidth > 768 && sidebar.classList.contains('show')) closeSidebar();
+  });
+</script>
+</body>
+</html>
